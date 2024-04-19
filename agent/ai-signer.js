@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -35,51 +35,54 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var ethers_1 = require("ethers");
 var protocol_kit_1 = require("@safe-global/protocol-kit");
 var protocol_kit_2 = require("@safe-global/protocol-kit");
-var dotenv_1 = require("dotenv");
-dotenv_1["default"].config();
-//require("dotenv").config();
+require("dotenv").config();
+var owner1PK = process.env.AI_PK;
 // https://chainlist.org/?search=sepolia&testnets=true
-var RPC_URL = 'https://sepolia.base.org';
+var RPC_URL = 'https://mainnet.base.org';
 var provider = new ethers_1.ethers.JsonRpcProvider(RPC_URL);
-var owner1Signer = new ethers_1.ethers.Wallet(process.env.AI_PK, provider);
-var owner2Signer = new ethers_1.ethers.Wallet(process.env.SIGNER_W2, provider);
+var owner1Signer = new ethers_1.ethers.Wallet(owner1PK, provider);
+//const owner2Signer = new ethers.Wallet(process.env.SIGNER_W2, provider)
 var safeAddress = "0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC";
-var ethAdapterOwner1 = new protocol_kit_1.EthersAdapter({
+var ethAdapter = new protocol_kit_1.EthersAdapter({
     ethers: ethers_1.ethers,
     signerOrProvider: owner1Signer
 });
+//const protocolKit = new SafeFactoryConfig.create({ethAdapter: owner1Signer})
 var manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82";
 function safeSigner(walletInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var walletAddress, amount, safeSdk, safeTransactionData, safeTransaction, signedSafeTX;
+        var walletAddress, amount, protocolKit, safeTransactionData, safeTransaction, signature;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     if (!walletInfo) return [3 /*break*/, 4];
                     walletAddress = walletInfo.walletAddress;
                     amount = walletInfo.amount;
-                    console.log("Wallet address:", amount);
-                    return [4 /*yield*/, protocol_kit_2["default"].create({ ethAdapter: ethAdapterOwner1, safeAddress: safeAddress })
+                    console.log("Wallet address:", walletInfo);
+                    return [4 /*yield*/, protocol_kit_2.default.create({
+                            ethAdapter: ethAdapter,
+                            safeAddress: safeAddress
+                        })
                         // Now you have the walletAddress and amount, you can create the transaction
                     ];
                 case 1:
-                    safeSdk = _a.sent();
+                    protocolKit = _a.sent();
                     safeTransactionData = {
-                        to: walletAddress,
+                        to: walletInfo,
                         data: '0x',
-                        value: ethers_1.ethers.parseUnits(amount, 'ether').toString() // Assuming the amount is in ether
+                        value: '1' // Assuming the amount is in ether
                     };
-                    return [4 /*yield*/, safeSdk.createTransaction({ transactions: [safeTransactionData] })];
+                    return [4 /*yield*/, protocolKit.createTransaction({ transactions: [safeTransactionData] })];
                 case 2:
                     safeTransaction = _a.sent();
-                    return [4 /*yield*/, safeSdk.signTransaction(safeTransaction)];
+                    return [4 /*yield*/, protocolKit.signTransaction(safeTransaction)];
                 case 3:
-                    signedSafeTX = _a.sent();
-                    console.log("The safe transaction is", safeTransaction, "and the signedTX is", signedSafeTX);
+                    signature = _a.sent();
+                    console.log("The safe transaction is", safeTransactionData, "and the signedTX is", signature);
                     // Log the transaction data
                     //console.log("the safe transaction data is ", safeTransactionData);
                     return [2 /*return*/, safeTransaction];
@@ -102,4 +105,5 @@ function safeSigner(walletInfo) {
 //       console.error('An error occurred:', error);
 //     }
 // }
+safeSigner("0x096d3c124688cbc01bCea04052de98f245378D82");
 module.exports = { safeSigner: safeSigner };

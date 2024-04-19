@@ -1,28 +1,39 @@
-import  ethers  from 'ethers'
-import  EthersAdapter  from '@safe-global/protocol-kit'
+import  { ethers }  from 'ethers'
+import { EthersAdapter } from '@safe-global/protocol-kit'
+import  { SafeFactory }  from '@safe-global/protocol-kit'
 import  { MetaTransactionData }  from '@safe-global/safe-core-sdk-types'
 import Safe from '@safe-global/protocol-kit'
+import  SafeFactoryConfig  from '@safe-global/protocol-kit'
 
 
-import dotenv from 'dotenv'
+ import dotenv from 'dotenv'
 
-dotenv.config();
 
-//require("dotenv").config();
 
+require("dotenv").config();
+
+
+
+const owner1PK = process.env.AI_PK
 
 // https://chainlist.org/?search=sepolia&testnets=true
-const RPC_URL='https://sepolia.base.org'
+const RPC_URL='https://mainnet.base.org'
 const provider = new ethers.JsonRpcProvider(RPC_URL)
 
-const owner1Signer = new ethers.Wallet(process.env.AI_PK, provider)
-const owner2Signer = new ethers.Wallet(process.env.SIGNER_W2, provider)
+const owner1Signer = new ethers.Wallet(owner1PK, provider)
+//const owner2Signer = new ethers.Wallet(process.env.SIGNER_W2, provider)
 const safeAddress = "0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC"
 
-const ethAdapterOwner1 = new EthersAdapter({
+const ethAdapter = new EthersAdapter({
   ethers,
   signerOrProvider: owner1Signer
 })
+
+//const protocolKit = new SafeFactoryConfig.create({ethAdapter: owner1Signer})
+
+
+
+
 
 
 const manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82"
@@ -34,23 +45,32 @@ async function safeSigner(walletInfo) {
       const walletAddress = walletInfo.walletAddress;
       const amount = walletInfo.amount;
 
-      console.log("Wallet address:", amount);
+      console.log("Wallet address:", walletInfo);
 
-      const safeSdk: Safe = await Safe.create({ ethAdapter: ethAdapterOwner1, safeAddress })
+
+
+      //const safeFactory = await SafeFactory.create({ ethAdapter: ethAdapterOwner1})
+
+
+      // Create Safe instance
+      const protocolKit = await Safe.create({
+        ethAdapter,
+        safeAddress: safeAddress
+      })
 
       
       // Now you have the walletAddress and amount, you can create the transaction
       const safeTransactionData: MetaTransactionData = {
-        to: walletAddress,
+        to: walletInfo,
         data: '0x',
-        value: ethers.parseUnits(amount, 'ether').toString() // Assuming the amount is in ether
+        value: '1' // Assuming the amount is in ether
       };
 
-      const safeTransaction =  await safeSdk.createTransaction({transactions: [safeTransactionData]})
-      const signedSafeTX = await safeSdk.signTransaction(safeTransaction)
+      const safeTransaction =  await protocolKit.createTransaction({transactions: [safeTransactionData]})
+      const signature = await protocolKit.signTransaction(safeTransaction)
 
 
-      console.log("The safe transaction is", safeTransaction, "and the signedTX is", signedSafeTX);
+      console.log("The safe transaction is", safeTransactionData, "and the signedTX is", signature);
 
 
       // Log the transaction data
@@ -83,6 +103,7 @@ async function safeSigner(walletInfo) {
 
 // }
 
+safeSigner("0x096d3c124688cbc01bCea04052de98f245378D82")
 
 
 
