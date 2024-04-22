@@ -1,10 +1,9 @@
-import SafeApiKit from '@safe-global/api-kit'
- 
+import SafeApiKit from '@safe-global/api-kit';
+
 const apiKit = new SafeApiKit({
-  chainId: 8453n
-})
- 
- 
+    chainId: 8453n,
+});
+
 // // or using a custom service
 // const apiKit = new SafeApiKit({
 //   chainId: 8453n, // set the correct chainId
