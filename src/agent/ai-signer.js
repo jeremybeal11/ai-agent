@@ -38,72 +38,90 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var ethers_1 = require("ethers");
 var protocol_kit_1 = require("@safe-global/protocol-kit");
+var safe_core_sdk_types_1 = require("@safe-global/safe-core-sdk-types");
 var protocol_kit_2 = require("@safe-global/protocol-kit");
-require("dotenv").config();
+var api_kit_1 = require("@safe-global/api-kit");
+require('dotenv').config();
 var owner1PK = process.env.AI_PK;
+var AI_ADD = "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089";
+if (!owner1PK || owner1PK === '') {
+    console.error('No AI_PK provided');
+    process.exit(1);
+}
 // https://chainlist.org/?search=sepolia&testnets=true
-var RPC_URL = 'https://mainnet.base.org';
+var RPC_URL = 'https://base.llamarpc.com';
+//const provider = new Web3.providers.HttpProvider(RPC_URL);
 var provider = new ethers_1.ethers.JsonRpcProvider(RPC_URL);
-var owner1Signer = new ethers_1.ethers.Wallet(owner1PK, provider);
+var signer1 = new ethers_1.ethers.Wallet(owner1PK, provider);
+//const web3 = new Web3(provider);
+//const owner1Signer = new ethers.Wallet(owner1PK, provider);
 //const owner2Signer = new ethers.Wallet(process.env.SIGNER_W2, provider)
-var safeAddress = "0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC";
+var safeAddress = '0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC';
 var ethAdapter = new protocol_kit_1.EthersAdapter({
     ethers: ethers_1.ethers,
-    signerOrProvider: owner1Signer
+    signerOrProvider: signer1
 });
-//const protocolKit = new SafeFactoryConfig.create({ethAdapter: owner1Signer})
-var manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82";
+var apiKit = new api_kit_1.default({
+    chainId: 8453n,
+    txServiceUrl: RPC_URL
+});
+//const manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82";
 function safeSigner(walletInfo) {
     return __awaiter(this, void 0, void 0, function () {
-        var walletAddress, amount, protocolKit, safeTransactionData, safeTransaction, signature;
+        var walletAddress, amount, protocolKit, safeTransactionData, safeTransaction, safeTxHash, signature, pendingTransactions;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!walletInfo) return [3 /*break*/, 4];
+                    if (!walletInfo) return [3 /*break*/, 7];
                     walletAddress = walletInfo.walletAddress;
                     amount = walletInfo.amount;
-                    console.log("Wallet address:", walletInfo);
                     return [4 /*yield*/, protocol_kit_2.default.create({
                             ethAdapter: ethAdapter,
-                            safeAddress: safeAddress
-                        })
-                        // Now you have the walletAddress and amount, you can create the transaction
-                    ];
+                            safeAddress: safeAddress,
+                        })];
                 case 1:
                     protocolKit = _a.sent();
                     safeTransactionData = {
-                        to: walletInfo,
+                        to: walletAddress,
                         data: '0x',
-                        value: '1' // Assuming the amount is in ether
+                        value: amount, // Assuming the amount is in ether
+                        operation: safe_core_sdk_types_1.OperationType.Call
                     };
                     return [4 /*yield*/, protocolKit.createTransaction({ transactions: [safeTransactionData] })];
                 case 2:
                     safeTransaction = _a.sent();
-                    return [4 /*yield*/, protocolKit.signTransaction(safeTransaction)];
+                    return [4 /*yield*/, protocolKit.getTransactionHash(safeTransaction)];
                 case 3:
-                    signature = _a.sent();
-                    console.log("The safe transaction is", safeTransactionData, "and the signedTX is", signature);
-                    // Log the transaction data
-                    //console.log("the safe transaction data is ", safeTransactionData);
-                    return [2 /*return*/, safeTransaction];
+                    safeTxHash = _a.sent();
+                    return [4 /*yield*/, protocolKit.signHash(safeTxHash)];
                 case 4:
+                    signature = _a.sent();
+                    console.log("The safe transaction is", safeTxHash);
+                    //console.log("and the hash is", safeTxHash);
+                    return [4 /*yield*/, apiKit.proposeTransaction({
+                            safeAddress: '0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC',
+                            safeTransactionData: safeTransaction.data,
+                            safeTxHash: safeTxHash,
+                            senderAddress: AI_ADD,
+                            senderSignature: signature.data
+                        })];
+                case 5:
+                    //console.log("and the hash is", safeTxHash);
+                    _a.sent();
+                    return [4 /*yield*/, apiKit.getTransaction(safeTxHash)];
+                case 6:
+                    pendingTransactions = _a.sent();
+                    console.log("The pending transaction is", pendingTransactions);
+                    return [2 /*return*/, safeTransaction];
+                case 7:
                     console.error('No wallet info could be retrieved.');
                     return [2 /*return*/, null];
             }
         });
     });
 }
-// async function main() {
-//   try {
-//     const walletInfo = await handleUserInput();
-//     // Pass the result to safeSigner and wait for the transaction data
-//     const safeTransactionData = await safeSigner(walletInfo);
-//     console.log("The transaction data is", safeTransactionData);
-//     //return getData;
-//   // ... use safeTransactionData as needed ...
-//     } catch (error) {
-//       console.error('An error occurred:', error);
-//     }
-// }
-safeSigner("0x096d3c124688cbc01bCea04052de98f245378D82");
+safeSigner({
+    walletAddress: '0x096d3c124688cbc01bCea04052de98f245378D82',
+    amount: '1',
+});
 module.exports = { safeSigner: safeSigner };
