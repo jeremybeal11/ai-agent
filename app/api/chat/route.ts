@@ -3,6 +3,9 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { OpenAI } from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { functions, runFunction } from "./functions";
+import { SendCommand  } from "../../../src/agent/commands/send";
+import { ReceiveCommand } from "../../../src/agent/commands/receive";
+//import { TrendingCoinsCommand } from "../../../src/agent/commands/trendingCoins";
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
@@ -43,17 +46,30 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   // Game context that is sent to OpenAI
-  const context = {
+  const context = 
+    {
     role: "system",
     content: `
-        You are an assistant with your own money. 
-        You ask the user for ideas on good ways for you to use your own money. 
+        You are a financial assistant, and your job is to chat with the client execute commands upon their request.
         If the user asks for possible ideas you are interested in, suggest that they can send money to a friend or family. 
         Do not suggest any other ideas.
         If the user gives an idea related to integrating or building on Syndicate's APIs, tell the user to send a DM to Germany. 
-        The something_special function can only be called once.
-    `
-  };
+        The something_special function can only be called once. 
+        These are the available commands you are able to execute, where "command" is the identifier and requestParameters is the set of parameters to be interpreted from the chat request:
+    ` +
+        JSON.stringify({
+            command: 'SEND',
+            requestParameters: new SendCommand(),
+            confirmationMessage: '',
+        }) +
+        ',\n\n' +
+        JSON.stringify({
+            command: 'RECEIVE',
+            requestParameters: new ReceiveCommand(),
+            confirmationMessage: '',
+        })
+
+    };
 
   // Combine the context with the user prompts into an array
   const combinedMessages = [context, ...messages];
