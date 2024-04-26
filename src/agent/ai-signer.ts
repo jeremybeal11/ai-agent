@@ -10,14 +10,11 @@ import { WalletInfo } from './wallet-info';
 
 require('dotenv').config();
 
-const owner1PK = process.env.AI_PK;
+//const owner1PK = process.env.AI_PK;
 
 const AI_ADDR= "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089"
 
-if (!owner1PK || owner1PK === '') {
-    console.error('No AI_PK provided');
-    process.exit(1);
-}
+
 
 // https://chainlist.org/?search=sepolia&testnets=true
 const RPC_URL = 'https://mainnet.base.org';
@@ -26,6 +23,8 @@ const provider = new Web3.providers.HttpProvider(RPC_URL);
 
 //const signer1 = new ethers.Wallet(owner1PK, provider);
 const web3 = new Web3(provider);
+
+web3.eth.accounts.wallet.add(process.env.AI_PK);
 
 
 //const owner1Signer = new ethers.Wallet(owner1PK, provider);
@@ -77,23 +76,24 @@ async function safeSigner(walletInfo: WalletInfo) {
         //console.log("and the hash is", safeTxHash);
 
         try {
-        await apiKit.proposeTransaction({
-            safeAddress: safeAddress,
-            safeTransactionData: safeTransaction.data,
-            safeTxHash,
-            senderAddress: AI_ADDR,
-            senderSignature: signature.data
-        
-        })
+            await apiKit.proposeTransaction({
+                safeAddress: safeAddress,
+                safeTransactionData: safeTransaction.data,
+                safeTxHash,
+                senderAddress: AI_ADDR,
+                senderSignature: signature.data
+            
+            })
 
-        //const pendingTransactions = await apiKit.getTransaction(safeTxHash)
-        //console.log("The pending transaction is", protocolKit.getAddress())
-        
+            const pendingTransactions = await apiKit.getTransaction(safeTxHash)
+            console.log("The pending transaction is", pendingTransactions)
+            
 
-        return safeTransaction;
-    } catch (error: any) {
-        console.error("Error while proposing transaction:", error.response ? error.response.data : error.message);
-    }
+            return safeTransaction;
+            
+        } catch (error: any) {
+            console.error("Error while proposing transaction:", error.response ? error.response.data : error.message);
+        }
     
     } else {
         console.error('No wallet info could be retrieved.');

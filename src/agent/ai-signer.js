@@ -8,24 +8,21 @@ const api_kit_1 = require("@safe-global/api-kit");
 const Web3 = require('web3');
 const protocol_kit_2 = require("@safe-global/protocol-kit");
 require('dotenv').config();
-const owner1PK = process.env.AI_PK;
+//const owner1PK = process.env.AI_PK;
 const AI_ADDR = "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089";
-if (!owner1PK || owner1PK === '') {
-    console.error('No AI_PK provided');
-    process.exit(1);
-}
 // https://chainlist.org/?search=sepolia&testnets=true
 const RPC_URL = 'https://mainnet.base.org';
 const provider = new Web3.providers.HttpProvider(RPC_URL);
 //const provider = new ethers.JsonRpcProvider(RPC_URL);
 //const signer1 = new ethers.Wallet(owner1PK, provider);
 const web3 = new Web3(provider);
+web3.eth.accounts.wallet.add(process.env.AI_PK);
 //const owner1Signer = new ethers.Wallet(owner1PK, provider);
 //const owner2Signer = new ethers.Wallet(process.env.SIGNER_W2, provider)
 const safeAddress = '0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC';
 const ethAdapter = new protocol_kit_2.Web3Adapter({
     web3,
-    signerAddress: AI_ADDR
+    signerAddress: "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089"
 });
 const apiKit = new api_kit_1.default({
     chainId: 8453n
@@ -63,8 +60,8 @@ async function safeSigner(walletInfo) {
                 senderAddress: AI_ADDR,
                 senderSignature: signature.data
             });
-            //const pendingTransactions = await apiKit.getTransaction(safeTxHash)
-            //console.log("The pending transaction is", protocolKit.getAddress())
+            const pendingTransactions = await apiKit.getTransaction(safeTxHash);
+            console.log("The pending transaction is", pendingTransactions);
             return safeTransaction;
         }
         catch (error) {
