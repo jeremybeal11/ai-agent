@@ -1,11 +1,10 @@
-import { ethers } from 'ethers';
-import { EthersAdapter } from '@safe-global/protocol-kit';
+//import { ethers } from 'ethers';
+//import { EthersAdapter } from '@safe-global/protocol-kit';
 import { MetaTransactionData, OperationType } from '@safe-global/safe-core-sdk-types';
 import Safe from '@safe-global/protocol-kit';
 import SafeApiKit from '@safe-global/api-kit'
 const Web3 = require('web3');
 import { Web3Adapter } from '@safe-global/protocol-kit'
-
 import dotenv from 'dotenv';
 import { WalletInfo } from './wallet-info';
 
@@ -13,7 +12,7 @@ require('dotenv').config();
 
 const owner1PK = process.env.AI_PK;
 
-const AI_ADD= "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089"
+const AI_ADDR= "0x3FfE02322f6D3b23b4f153289E1f280eb15c0089"
 
 if (!owner1PK || owner1PK === '') {
     console.error('No AI_PK provided');
@@ -25,7 +24,7 @@ const RPC_URL = 'https://mainnet.base.org';
 const provider = new Web3.providers.HttpProvider(RPC_URL);
 //const provider = new ethers.JsonRpcProvider(RPC_URL);
 
-const signer1 = new ethers.Wallet(owner1PK, provider);
+//const signer1 = new ethers.Wallet(owner1PK, provider);
 const web3 = new Web3(provider);
 
 
@@ -35,7 +34,7 @@ const safeAddress = '0x8413e348B1ed25E06d007e5f5d946a8ffC5240aC';
 
 const ethAdapter = new Web3Adapter({
     web3,
-    signerAddress: AI_ADD
+    signerAddress: AI_ADDR
 });
 
 const apiKit = new SafeApiKit({
@@ -68,7 +67,7 @@ async function safeSigner(walletInfo: WalletInfo) {
             data: '0x',
             operation: OperationType.Call
         };
-        const senderAddress = await signer1.getAddress();
+        //const senderAddress = await signer1.getAddress();
         const safeTransaction =  await protocolKit.createTransaction({transactions: [safeTransactionData]})
         const safeTxHash = await protocolKit.getTransactionHash(safeTransaction)
         const signature = await protocolKit.signHash(safeTxHash)
@@ -82,7 +81,7 @@ async function safeSigner(walletInfo: WalletInfo) {
             safeAddress: safeAddress,
             safeTransactionData: safeTransaction.data,
             safeTxHash,
-            senderAddress: senderAddress,
+            senderAddress: AI_ADDR,
             senderSignature: signature.data
         
         })

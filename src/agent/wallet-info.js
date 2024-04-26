@@ -1,17 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userWallet = void 0;
-var manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82";
+const manualMessage = "send 10 USDC to paul's wallet at 0x096d3c124688cbc01bCea04052de98f245378D82";
 function userWallet(response) {
     // Regular expression to match a typical wallet address and an amount
-    var walletAddressRegex = /0x[a-fA-F0-9]{40}/i;
-    var amountRegex = /(\d+\.?\d*)\s*USDC/;
+    const walletAddressRegex = /0x[a-fA-F0-9]{40}/i;
+    const amountRegex = /(\d+\.?\d*)\s*USDC/;
     // Extract wallet address and amount from the response
-    var walletAddressMatch = response.match(walletAddressRegex);
-    var amountMatch = response.match(amountRegex);
+    const walletAddressMatch = response.match(walletAddressRegex);
+    const amountMatch = response.match(amountRegex);
     // If both wallet address and amount are found, create the object
     if (walletAddressMatch && amountMatch) {
-        var walletInfo = {
+        const walletInfo = {
             walletAddress: walletAddressMatch[0],
             amount: amountMatch[1], // This captures the numeric value after "Amount:"
         };
