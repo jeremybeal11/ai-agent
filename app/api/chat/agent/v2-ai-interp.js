@@ -1,3 +1,5 @@
+// TODO Remove this file. no longer needed
+
 const { getOpenAIResponse, messageHistory } = require('../openai/openai_chat');
 const { userWallet } = require('./wallet-info');
 const { safeSigner } = require('./ai-signer');

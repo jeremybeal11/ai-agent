@@ -1,5 +1,5 @@
 import { CompletionCreateParams } from "openai/resources/chat/index";
-import { safeSigner } from "../../../src/agent/ai-signer";
+import { safeSigner } from "../../api/chat/agent/ai-signer";
 
 export const TRANSACTION_COMMAND_NAMES = {
   send: "send_money",

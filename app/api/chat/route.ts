@@ -3,8 +3,8 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { OpenAI } from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { functions, runFunction } from "./functions";
-import { SendCommand  } from "../../../src/agent/commands/send";
-import { ReceiveCommand } from "../../../src/agent/commands/receive";
+import { SendCommand  } from "../../api/chat/agent/commands/send";
+import { ReceiveCommand } from "../../api/chat/agent/commands/receive";
 //import { TrendingCoinsCommand } from "../../../src/agent/commands/trendingCoins";
 
 // Create an OpenAI API client (that's edge friendly!)

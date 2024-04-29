@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runFunction = exports.functions = exports.TRANSACTION_COMMAND_NAMES = void 0;
-const ai_signer_1 = require("../../../src/agent/ai-signer");
+const ai_signer_1 = require("../../api/chat/agent/ai-signer");
 exports.TRANSACTION_COMMAND_NAMES = {
     send: "send_money",
     swap: "swap",
